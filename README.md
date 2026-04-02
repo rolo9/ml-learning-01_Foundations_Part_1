@@ -141,6 +141,40 @@ services:
     tty: true
 ```
 
+
+# Step8-2 Makefile
+
+Docker操作を簡単にするために Makefile を使用する。
+
+## Makefile内容
+```makefile
+build:
+  docker compose build
+
+up:
+  docker compose up -d
+
+down:
+  docker compose down
+
+restart:
+  docker compose restart
+
+logs:
+  docker compose logs -f
+
+ps:
+  docker compose ps
+
+# コンテナ内に入る
+shell:
+  docker exec -it my-env bash
+
+# Jupyterをブラウザで開く
+jupyter:
+  open http://localhost:8888
+```
+
 # Step9 Docker build
 ```bash
 make build
