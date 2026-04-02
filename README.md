@@ -1,11 +1,12 @@
-# 機械学習学習環境  
-## 固定フロー + Docker Compose
+# 機械学習学習環境
+## Docker + Conda + Jupyter
 
 Project: **ml-learning-01_Foundations_Part_1**
 
 ---
 
 # Step0 プロジェクト作成
+
 ```bash
 mkdir ~/workspace/ml-learning-01_Foundations_Part_1
 cd ~/workspace/ml-learning-01_Foundations_Part_1
@@ -13,28 +14,37 @@ git init
 ```
 
 # Step1 ディレクトリ構造
+
 ml-learning-01_Foundations_Part_1
+│
 ├ notebooks
 ├ src
 ├ data
-├ Makefile
+│
+├ Dockerfile
 ├ docker-compose.yml
+├ environment.yml
+├ .dockerignore
+│
+├ Makefile
 ├ README.md
 └ .gitignore
+
 
 # Step2 フォルダ作成
 ```bash
 mkdir notebooks src data
-touch README.md .gitignore docker-compose.yml Makefile
+touch README.md .gitignore docker-compose.yml Makefile Dockerfile environment.yml .dockerignore
 ```
 
-# Step3 Sublimeでプロジェクトを開く
+# Step3 Sublimeでプロジェクトを開く（Sublime Text を使用）
+sublimeについてはかめさんの紹介を参照；https://datawokagaku.com/best_editor/
 ```bash
 subl ~/workspace/ml-learning-01_Foundations_Part_1
 ```
 
-# Step4 .gitignore設定
-```bash
+# Step4 .gitignore 設定
+```コード
 .ipynb_checkpoints
 data/*
 !data/.gitkeep
@@ -42,17 +52,86 @@ __pycache__
 .DS_Store
 ```
 
-# Step5 Dockerイメージ取得
-```bash
-docker pull datascientistus/ds-python-env3
+# Step5 .dockerignore 設定
+Docker build を高速化するため不要ファイルを除外する。
+```コード
+.git
+.gitignore
+__pycache__
+*.pyc
+*.pyo
+*.pyd
+
+notebooks/.ipynb_checkpoints
+data
+
+.DS_Store
 ```
 
-# Step6 docker-compose.yml 作成
+# Step6 Python環境定義
+environment.yml
+```yaml
+name: ml-env
+
+channels:
+  - conda-forge
+
+dependencies:
+  - python=3.11
+  - pandas
+  - scikit-learn
+  - matplotlib
+  - seaborn
+  - plotly
+  - optuna
+  - lightgbm
+  - catboost
+  - jupyterlab
+```
+
+# Step7 Dockerfile 作成
+Docker + Miniforge + mamba 環境
+```dockerfile
+FROM ubuntu:24.04
+
+RUN apt-get update && apt-get install -y \
+    wget \
+    curl \
+    git \
+    vim \
+    sudo \
+    libgl1 \
+    build-essential \
+    && apt-get clean
+
+WORKDIR /opt
+
+RUN wget https://github.com/conda-forge/miniforge/releases/latest/download/Miniforge3-Linux-aarch64.sh \
+    && bash Miniforge3-Linux-aarch64.sh -b -p /opt/conda \
+    && rm Miniforge3-Linux-aarch64.sh
+
+ENV PATH=/opt/conda/bin:$PATH
+
+RUN conda install -y mamba -n base -c conda-forge
+
+WORKDIR /tmp
+
+COPY environment.yml .
+
+RUN mamba env create -f environment.yml \
+    && mamba clean -afy
+
+RUN mkdir -p /work
+WORKDIR /work
+
+CMD ["jupyter", "lab", "--ip=0.0.0.0", "--allow-root", "--ServerApp.token=''"]
+```
+
+# Step8 docker-compose.yml
 ```yaml
 services:
   jupyter:
-    image: datascientistus/ds-python-env3
-    platform: linux/amd64
+    build: .
     container_name: my-env
     ports:
       - "8888:8888"
@@ -62,86 +141,67 @@ services:
     tty: true
 ```
 
-# Step7 Docker起動
+# Step9 Docker build
+```bash
+make build
+```
+または
+```bash
+docker compose build
+```
+
+# Step10 Docker起動
 ```bash
 make up
 ```
 
-# Step8 Jupyterアクセス
+# Step11 Jupyterアクセス
+```bash
 http://localhost:8888
+```
 
-# Step9 Notebook実験
+# Step12 Notebook実験
+```コード
 notebooks/01_linear_regression.ipynb
+```
 
-# Step10 再利用コード抽出
-Notebookで書いた処理を整理する
+# Step13 再利用コード抽出
+Notebookで書いた処理を整理
+
 例
-	•	前処理
-	•	可視化
-	•	モデル処理
+  • 前処理
+  • 可視化
+  • モデル処理
 
-# Step11 Pythonモジュール化
+# Step14 Pythonモジュール化
+```コード
 src/preprocessing.py
 src/model.py
+```
 
-# Step12 Notebookから呼び出し
-```bash
+# Step15 Notebookから呼び出し
+```python
 from src.preprocessing import preprocess
 ```
 
-# Step13 Git保存
+# Step16 Git保存
 ```bash
 git add .
 git commit -m "update ML workflow"
 ```
 
-# Step14 GitHub push
+# Step17 GitHub push
 ```bash
 git push -u origin main
 ```
 
 # 学習フロー
 Notebook experiment
-↓
+        ↓
 Code整理
-↓
+        ↓
 src に移動
-↓
+        ↓
 Notebookからimport
-↓
+        ↓
 Git保存
-
----
-
-# Docker操作 (Makefile)
-
-起動
-
-```bash
-make up
-```
-
-停止
-
-```bash
-make down
-```
-
-再起動
-
-```bash
-make restart
-```
-
-ログ確認
-
-```bash
-make logs
-```
-
-Jupyter Notebook を開く
-
-```bash
-make notebook
-```
-

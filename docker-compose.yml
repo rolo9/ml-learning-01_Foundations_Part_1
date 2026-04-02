@@ -1,7 +1,6 @@
 services:
   jupyter:
-    image: datascientistus/ds-python-env3
-    platform: linux/amd64
+    build: .
     container_name: my-env
     ports:
       - "8888:8888"

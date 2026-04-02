@@ -1,3 +1,6 @@
+build:
+	docker compose build
+
 up:
 	docker compose up -d
 
@@ -11,5 +14,12 @@ restart:
 logs:
 	docker compose logs -f
 
-notebook:
+ps:
+	docker compose ps
+
+# コンテナ内に入れ、python, pip list, conda listなどの確認ができる
+shell:
+	docker exec -it my-env bash
+
+jupyter:
 	open http://localhost:8888
