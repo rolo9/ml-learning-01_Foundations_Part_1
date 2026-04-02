@@ -24,11 +24,12 @@ RUN conda install -y mamba -n base -c conda-forge
 
 WORKDIR /tmp
 
-# environment install
+# Python environment install
 COPY environment.yml .
 
-RUN mamba env create -f environment.yml \
-    && mamba clean -afy
+RUN mamba env update -n base -f environment.yml \
+    && mamba clean -afy \
+    && rm -rf /opt/conda/pkgs
 
 RUN mkdir -p /work
 WORKDIR /work
