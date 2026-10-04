@@ -243,3 +243,58 @@ src に移動
 Notebookからimport
         ↓
 Git保存
+
+# Data Requirements and Recovery
+
+このRepositoryで使用する学習用データは `data/` に配置する。
+
+`data/*` は `.gitignore` の対象であり、CSVファイルそのものはGit / GitHubでは管理しない。
+したがって、clean clone後は必要なデータを元の配布元・取得元から再取得し、`data/` に配置する必要がある。
+
+## Required Data
+
+### sample_data.csv
+
+- 用途: 線形回帰・最急降下法の学習
+- Provenance: Udemy講座「米国データサイエンティストがやさしく教える機械学習超入門」の配布リソース
+- 確認箇所: 線形回帰セクション / 最急降下法実装
+- Placement: `data/sample_data.csv`
+- Recovery: Udemyの該当講義リソースから再取得する
+
+### sample_data2.csv
+
+- 用途: 特徴量スケーリングの学習
+- Provenance: 同Udemy講座の配布リソース
+- 確認箇所: 特徴量スケーリングセクション
+- Placement: `data/sample_data2.csv`
+- Recovery: Udemyの該当講義リソースから再取得する
+
+### sample_data3.csv
+
+- 用途: 質的変数・ダミー変数の学習
+- Provenance: 同Udemy講座の配布リソース
+- 確認箇所: 質的変数の特徴量 / ダミー変数
+- Placement: `data/sample_data3.csv`
+- Recovery: Udemyの該当講義リソースから再取得する
+
+### Hitters.csv
+
+- 用途: 野球選手データを用いた機械学習の学習
+- Provenance: 学習時に外部GitHub datasetから取得
+- Observed source: `kirenz/datasets` repository の `Hitters.csv`
+- Placement: `data/Hitters.csv`
+- Recovery: 上記取得元から再取得し、`data/Hitters.csv` として配置する
+- Note: 外部取得元は将来変更・削除される可能性があるため、恒久的な可用性は保証しない
+
+## Recovery Boundary
+
+Repositoryをcloneするだけでは `data/*.csv` は復元されない。
+
+環境・コードとデータではRecovery経路が異なる。
+
+- Code / Notebook / Environment Definition: Git / GitHubから復元
+- Runtime: Dockerfile / environment.ymlからImageを再buildし、Containerを再作成
+- Learning Data: 各配布元・取得元から再取得し、`data/` に配置
+
+Reproducibilityは「すべてのファイルをGitに保存すること」ではなく、
+必要な状態を適切なdurable sourceから再取得または再生成できることを意味する。
